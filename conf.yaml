@@ -1,0 +1,15 @@
+bind: 0.0.0.0:9836
+wait_queue_len: 10000
+max_conn: 50
+timeout: 60 #连接时长
+failover: 3 #负载均衡尝试连接次数
+type: "redis" #mysql redis nginx 
+stats: 0.0.0.0:8690
+backend:
+    - 127.0.1.1:80
+    - 127.0.1.1:80
+    - 127.0.1.1:80
+
+log:
+    level: "info"
+    path: "./logs/proxy.log"
