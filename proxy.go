@@ -28,18 +28,34 @@ func initProxy() {
 	// 等待连接处理
 	go waitConn(waitQueue, connPools)
 	// 接收连接并抛给管道处理
+	
+    str := "Connection refused"
+    buf := make([]byte, len(str)+1)
+    copy(buf, str)
+    buf[len(str)] = '\n'
+	
 	for {
 		conn, err := server.Accept()
 		if err != nil {
 			Log.Error(err)
 			continue
 		}
-		fromRemoteAddr := fmt.Sprintf("%s", conn.RemoteAddr())
-		countGuard.Lock()
-		Arrip[fromRemoteAddr] = fromRemoteAddr
-		countGuard.Unlock()
 		Log.Infof("Received connection from %s.\n", conn.RemoteAddr())
-		waitQueue <- conn
+		
+		if (len(Arrip)+1)>(Config.WaitQueueLen + Config.MaxConn) {
+    		_, err = conn.Write(buf)
+    		if err != nil {
+    		    conn.Close()
+    		}
+		}else{
+    		fromRemoteAddr := fmt.Sprintf("%s", conn.RemoteAddr())
+    		countGuard.Lock()
+    		Arrip[fromRemoteAddr] = fromRemoteAddr
+    		countGuard.Unlock()
+    		
+		    waitQueue <- conn
+		}
+
 	}
 }
 

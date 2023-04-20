@@ -9,7 +9,7 @@ import (
 // 查询监控信息的接口
 func statsHandler(w http.ResponseWriter, r *http.Request) {
 	_str := ""
-	_str += fmt.Sprintf("Server max %d connecting num:%d \n\n", Config.MaxConn , len(Arrip))
+	_str += fmt.Sprintf("Server max %d, WaitQueueLen %d, connecting num:%d \n\n", Config.MaxConn, Config.WaitQueueLen, len(Arrip))
 	
 	for _, vv := range Arrip {
 		_str += fmt.Sprintf("connecting ip :%s \n", vv)
