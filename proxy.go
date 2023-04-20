@@ -43,10 +43,8 @@ func initProxy() {
 		Log.Infof("Received connection from %s.\n", conn.RemoteAddr())
 		
 		if (len(Arrip)+1)>(Config.WaitQueueLen + Config.MaxConn) {
-    		_, err = conn.Write(buf)
-    		if err != nil {
-    		    conn.Close()
-    		}
+    		conn.Write(buf)
+    		conn.Close()
 		}else{
     		fromRemoteAddr := fmt.Sprintf("%s", conn.RemoteAddr())
     		countGuard.Lock()
