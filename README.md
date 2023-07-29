@@ -27,6 +27,18 @@ log:
 
 ```
 
+```
+[root@Web6 goup]# ./goup -c ./conf.yaml 
+Start Proxy...
+Start Successful...
+2023/07/29 11:29:53 
+2023/07/29 11:29:53 From client:192.168.5.254:36942 To Server:192.168.2.6:3307; Query: SET NAMES utf8
+2023/07/29 11:29:59 From client:192.168.5.254:36942 To Server:192.168.2.6:3307; Quit: user quit
+
+```
+
+
+
 ## http://1.1.1.1:8090/
 ```
 Server connecting num:3 
