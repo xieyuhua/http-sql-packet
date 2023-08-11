@@ -4,11 +4,9 @@ import (
 	"net"
 	"time"
 	"fmt"
-	"sync"
 )
 
-var Arrip map[string]string
-var countGuard sync.Mutex
+var Onlinenum int
 
 // 初始化代理服务
 func initProxy() {
@@ -17,7 +15,6 @@ func initProxy() {
 	if err != nil {
 		Log.Fatal(err)
 	}
-	Arrip = make(map[string]string)
 	// 等待的队列长度
 	waitQueue := make(chan net.Conn, Config.WaitQueueLen)
 	// 最大并发连接
@@ -25,15 +22,10 @@ func initProxy() {
 	for i := 0; i < Config.MaxConn; i++ {
 		connPools <- true
 	}
+	Onlinenum = 0
 	// 等待连接处理
 	go waitConn(waitQueue, connPools)
 	// 接收连接并抛给管道处理
-	
-    str := "Connection refused"
-    buf := make([]byte, len(str)+1)
-    copy(buf, str)
-    buf[len(str)] = '\n'
-	
 	for {
 		conn, err := server.Accept()
 		if err != nil {
@@ -41,19 +33,7 @@ func initProxy() {
 			continue
 		}
 		Log.Infof("Received connection from %s.\n", conn.RemoteAddr())
-		
-		if (len(Arrip)+1)>(Config.WaitQueueLen + Config.MaxConn) {
-    		conn.Write(buf)
-    		conn.Close()
-		}else{
-    		fromRemoteAddr := fmt.Sprintf("%s", conn.RemoteAddr())
-    		countGuard.Lock()
-    		Arrip[fromRemoteAddr] = fromRemoteAddr
-    		countGuard.Unlock()
-    		
-		    waitQueue <- conn
-		}
-
+		waitQueue <- conn
 	}
 }
 
@@ -62,14 +42,12 @@ func waitConn(waitQueue chan net.Conn, connPools chan bool) {
 	for conn := range waitQueue {
 		// 接收一个链接，连接池释放一个
 		<-connPools
+		Onlinenum = Onlinenum + 1
 		go func(conn net.Conn) {
 			handleConn(conn)
 			// 链接处理完毕，增加
 			connPools <- true
-			fromRemoteAddr := fmt.Sprintf("%s", conn.RemoteAddr())
-			countGuard.Lock()
-			delete(Arrip, fromRemoteAddr)
-			countGuard.Unlock()
+			Onlinenum = Onlinenum - 1
 			Log.Infof("Closed connection from %s.\n", conn.RemoteAddr())
 		}(conn)
 	}
@@ -108,7 +86,8 @@ func handleConn(conn net.Conn) {
 func transaction(from, to net.Conn, complete, oneSwitch, otherSwitch chan bool, out bool) {
 	var err error
 	var read int
-	bytes := make([]byte, 5120)
+	
+	bytes := make([]byte, Config.BulkSize)
 	for {
 		select {
 		case <-otherSwitch:
@@ -132,9 +111,12 @@ func transaction(from, to net.Conn, complete, oneSwitch, otherSwitch chan bool, 
 			        proxyLog(fromRemoteAddr, toRemoteAddr,read, bytes)
 			    }
 			    if Config.Type=="redis" {
+			        Log.Infof("from %s to %s. mgs:%s \n", from.RemoteAddr(), to.RemoteAddr(), string(bytes))
 			        fmt.Println(string(bytes))
 			    }
-			    
+			    if Config.Type=="oracle" {
+			        ParseOracleSQL(fromRemoteAddr, toRemoteAddr, bytes)
+			    }
 			}
 			// 设置超时时间
 			to.SetWriteDeadline(time.Now().Add(timeOutSec))
