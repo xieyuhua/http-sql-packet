@@ -1,10 +1,6 @@
 ##go-upstream
 服务代理中间件，支持后端服务集群配置，根据HASH配置选择后端机器进行代理。
 
-##安装方法
-```
-go get github.com/fbbin/go-upstream
-```
 
 ##Examples
 
@@ -14,7 +10,7 @@ wait_queue_len: 10000
 max_conn: 50
 timeout: 60 #连接时长
 failover: 3 #负载均衡尝试连接次数
-type: "mysql" #mysql redis nginx 
+type: "mysql" #mysql redis nginx oracle
 stats: 0.0.0.0:8090
 backend:
     - 127.0.1.1:3306
