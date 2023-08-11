@@ -1,14 +1,15 @@
-bind: 0.0.0.0:9836
-wait_queue_len: 1
-max_conn: 3
+bind: 0.0.0.0:8004
+wait_queue_len: 10000
+max_conn: 50
+bulk_size: 5120
 timeout: 60 #连接时长
 failover: 3 #负载均衡尝试连接次数
-type: "mysql" #mysql redis nginx 
-stats: 0.0.0.0:8690
+type: "oracle" #mysql redis nginx oracle
+stats: 0.0.0.0:2356
 backend:
-    - 127.0.1.1:3306
-    - 127.0.1.1:3306
-    - 127.0.1.1:3306
+    - 127.0.1.1:1521
+    - 127.0.1.1:1521
+    - 127.0.1.1:1521
 
 log:
     level: "info"
