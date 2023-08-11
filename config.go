@@ -12,6 +12,7 @@ type ProxyConfig struct {
 	Type         string    `yaml:"type"`
 	WaitQueueLen int       `yaml:"wait_queue_len"`
 	MaxConn      int       `yaml:"max_conn"`
+	BulkSize      int       `yaml:"bulk_size"`
 	Timeout      int       `yaml:"timeout"`
 	FailOver     int       `yaml:"failover"`
 	Backend      []string  `yaml:"backend"`
