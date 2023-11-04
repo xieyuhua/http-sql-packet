@@ -1,22 +1,3 @@
 {"level":"info","msg":"InitLogger: path: ./logs/proxy.log, level: info, formatter: json","time":"2023-04-20T09:14:23+08:00"}
 {"level":"info","msg":"Start monitor on addr 0.0.0.0:8690","time":"2023-04-20T09:14:23+08:00"}
 {"level":"info","msg":"Proxying 0.0.0.0:9836 -\u003e [127.0.1.1:3306 127.0.1.1:3306 127.0.1.1:3306]\n","time":"2023-04-20T09:14:23+08:00"}
-{"level":"info","msg":"Received connection from 222.180.210.250:2285.\n","time":"2023-04-20T09:53:07+08:00"}
-{"level":"info","msg":"from 222.180.210.250:2285 to 127.0.1.1:3306.\n","time":"2023-04-20T09:53:07+08:00"}
-{"level":"info","msg":"Received connection from 222.180.210.250:2286.\n","time":"2023-04-20T09:53:08+08:00"}
-{"level":"info","msg":"from 222.180.210.250:2286 to 127.0.1.1:3306.\n","time":"2023-04-20T09:53:08+08:00"}
-{"level":"info","msg":"Received connection from 222.180.210.250:2287.\n","time":"2023-04-20T09:53:10+08:00"}
-{"level":"info","msg":"from 222.180.210.250:2287 to 127.0.1.1:3306.\n","time":"2023-04-20T09:53:10+08:00"}
-{"level":"info","msg":"Received connection from 222.180.210.250:2288.\n","time":"2023-04-20T09:53:12+08:00"}
-{"level":"info","msg":"Received connection from 222.180.210.250:2289.\n","time":"2023-04-20T09:53:30+08:00"}
-{"level":"info","msg":"Received connection from 222.180.210.250:2290.\n","time":"2023-04-20T09:53:34+08:00"}
-{"level":"info","msg":"Received connection from 222.180.210.250:2291.\n","time":"2023-04-20T09:53:40+08:00"}
-{"level":"info","msg":"Received connection from 222.180.210.250:2292.\n","time":"2023-04-20T09:53:48+08:00"}
-{"level":"info","msg":"Received connection from 222.180.210.250:2293.\n","time":"2023-04-20T09:53:52+08:00"}
-{"level":"info","msg":"Received connection from 222.180.210.250:2294.\n","time":"2023-04-20T09:53:54+08:00"}
-{"level":"info","msg":"Received connection from 222.180.210.250:2295.\n","time":"2023-04-20T09:53:57+08:00"}
-{"level":"info","msg":"Closed connection from 222.180.210.250:2285.\n","time":"2023-04-20T09:54:04+08:00"}
-{"level":"info","msg":"from 222.180.210.250:2288 to 127.0.1.1:3306.\n","time":"2023-04-20T09:54:04+08:00"}
-{"level":"info","msg":"Closed connection from 222.180.210.250:2288.\n","time":"2023-04-20T09:54:04+08:00"}
-{"level":"info","msg":"Closed connection from 222.180.210.250:2286.\n","time":"2023-04-20T09:54:04+08:00"}
-{"level":"info","msg":"Closed connection from 222.180.210.250:2287.\n","time":"2023-04-20T09:54:04+08:00"}
