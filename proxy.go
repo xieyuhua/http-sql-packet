@@ -10,7 +10,7 @@ var Onlinenum int
 
 // 初始化代理服务
 func initProxy() {
-	Log.Infof("Proxying %s -> %s\n", Config.Bind, Config.Backend)
+	Log.Infof("Proxying %s -> %s \n", Config.Bind, Config.Backend)
 	server, err := net.Listen("tcp", Config.Bind)
 	if err != nil {
 		Log.Fatal(err)
@@ -82,12 +82,12 @@ func handleConn(conn net.Conn) {
 	remote.Close()
 }
 
+
 // 数据交换传输（从from读数据，再写入to）
 func transaction(from, to net.Conn, complete, oneSwitch, otherSwitch chan bool, out bool) {
 	var err error
 	var read int
-	
-	bytes := make([]byte, Config.BulkSize)
+	buffer := make([]byte, Config.BulkSize)
 	for {
 		select {
 		case <-otherSwitch:
@@ -97,7 +97,7 @@ func transaction(from, to net.Conn, complete, oneSwitch, otherSwitch chan bool, 
 			timeOutSec := time.Duration(Config.Timeout) * time.Second
 			// 设置超时时间
 			from.SetReadDeadline(time.Now().Add(timeOutSec))
-			read, err = from.Read(bytes)
+			read, err = from.Read(buffer)
 			if err != nil {
 				complete <- true
 				oneSwitch <- true
@@ -105,22 +105,29 @@ func transaction(from, to net.Conn, complete, oneSwitch, otherSwitch chan bool, 
 			}
 			//客户端请求
 			if out {
+			 //   fmt.Println(string(buffer))
 			    fromRemoteAddr := fmt.Sprintf("client:%s", from.RemoteAddr())
 			    toRemoteAddr   := fmt.Sprintf("Server:%s", to.RemoteAddr())
 			    if Config.Type=="mysql" {
-			        proxyLog(fromRemoteAddr, toRemoteAddr,read, bytes)
+			       go proxyLog(fromRemoteAddr, toRemoteAddr, read, buffer)
 			    }
 			    if Config.Type=="redis" {
-			        Log.Infof("from %s to %s. mgs:%s \n", from.RemoteAddr(), to.RemoteAddr(), string(bytes))
-			        fmt.Println(string(bytes))
+			        Log.Infof("from %s to %s. mgs:%s \n", from.RemoteAddr(), to.RemoteAddr(), string(buffer))
+			        fmt.Println(string(buffer))
 			    }
 			    if Config.Type=="oracle" {
-			        ParseOracleSQL(fromRemoteAddr, toRemoteAddr, bytes)
+			       ParseOracleSQL(fromRemoteAddr, toRemoteAddr, read, buffer)
+			    }
+			    
+			    if Config.Type=="http" {
+			       fmt.Println(string(buffer))
 			    }
 			}
+			
 			// 设置超时时间
 			to.SetWriteDeadline(time.Now().Add(timeOutSec))
-			_, err = to.Write(bytes[:read])
+			_, err = to.Write(buffer[:read])
+// 			fmt.Println(string(buffer[5:read]))
 			if err != nil {
 				complete <- true
 				oneSwitch <- true
