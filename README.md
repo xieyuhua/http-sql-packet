@@ -1,16 +1,15 @@
-##go-upstream
-服务代理中间件，支持后端服务集群配置，根据HASH配置选择后端机器进行代理。
+##goproxy-packet
 
+tcp代理，然后解析packet内容。
 
 ##Examples
-
 ```
-bind: 0.0.0.0:9810
-wait_queue_len: 10000
+bind: 0.0.0.0:5678
+wait_queue_len: 100
 max_conn: 50
 timeout: 60 #连接时长
 failover: 3 #负载均衡尝试连接次数
-type: "mysql" #mysql redis nginx oracle
+type: "mysql" #mysql redis http oracle
 stats: 0.0.0.0:8090
 backend:
     - 127.0.1.1:3306
@@ -32,8 +31,6 @@ Start Successful...
 2023/07/29 11:29:59 From client:192.168.5.254:36942 To Server:192.168.2.6:3307; Quit: user quit
 
 ```
-
-
 
 ## http://1.1.1.1:8090/
 ```
