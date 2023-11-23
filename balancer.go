@@ -43,20 +43,63 @@ func getBackendSvr(conn net.Conn) (*BackendSvr, bool) {
 	return BackendSvr, ok
 }
 
+func removeElement(slice []string, elem string) []string {
+    for i, v := range slice {
+        if v == elem {
+            return append(slice[:i], slice[i+1:]...)
+        }
+    }
+    return slice
+}
+
+
+var RemoveList []string
 // 代理服务检测存活
 func checkBackendSvrs() {
+    
+	//重新检查服务
+	for _, item := range BackendSvrs {
+	    //初始化代理服务
+    	_, err := net.Dial("tcp", item.identify)
+    	if err != nil {
+			item.isLive = false
+			println("Remove " , item.identify)
+			Consisthash.Remove(item.identify)
+			RemoveList = append(RemoveList, item.identify)
+    	}
+	}
+	
 	rand.Seed(time.Now().UnixNano())
 	// 设置定时（10s对服务进行检测）执行管道
-	ticker := time.Tick(time.Duration(10) * time.Second)
+	ticker := time.Tick(time.Duration(5) * time.Second)
 	for _ = range ticker {
 		for _, server := range BackendSvrs {
 			if server.failTimes >= Config.FailOver && server.isLive == true {
 				server.isLive = false
+				println("Remove ", server.identify)
 				Consisthash.Remove(server.identify)
+				RemoveList = append(RemoveList, server.identify)
 			}
 		}
+		//重新检查服务
+    	for _, serfail := range RemoveList {
+        	// 链接远程代理服务器
+        	_, err := net.Dial("tcp", serfail)
+        	if err == nil {
+            	RemoveList = removeElement(RemoveList, serfail)
+        		Consisthash.Add(serfail)
+        		BackendSvrs[serfail] = &BackendSvr{
+        			identify:  serfail,
+        			isLive:    true,
+        			failTimes: 0,
+        		}
+        	}
+    	}
 	}
 }
+
+
+
 
 // 设置定时器
 func timer(input chan interface{}) {
