@@ -1,6 +1,7 @@
 ##goproxy-packet
 
-tcp代理，然后解析packet内容。
+通过tcp连接，然后解析packet内容。解析协议 http、oracle、mysql，redis请求packet，可以用于sql审计、packet内容防火墙
+
 
 ##Examples
 ```
