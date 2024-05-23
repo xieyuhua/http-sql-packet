@@ -13,6 +13,7 @@ import (
 var (
 	Config     ProxyConfig
 	Log        *logrus.Logger
+	Logs       = logrus.New()
 	configFile = flag.String("c", "./conf.yaml", "配置文件：conf.yaml")
 )
 
