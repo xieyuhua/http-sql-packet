@@ -4,16 +4,18 @@ import (
 	"net"
 	"time"
 	"fmt"
+	"sync"
 	"strings"
 )
 
 var Onlinenum int
-var List map[string]*IPStruct
+// var List map[string]*IPStruct
 
 type IPStruct struct {
 	Time int64    
 	Title string  
 }
+var TotalBytesLock sync.Mutex
 
 // 初始化代理服务
 func initProxy() {
@@ -31,7 +33,7 @@ func initProxy() {
 	for i := 0; i < Config.MaxConn; i++ {
 		connPools <- true
 	}
-	List =  make(map[string]*IPStruct)
+	
 	
 	Onlinenum = 0
 	// 等待连接处理
@@ -85,21 +87,26 @@ func handleConn(conn net.Conn) {
 	otherSwitch := make(chan bool, 1)
 	// 将当前客户端链接发送的数据发送给远程被代理的服务器
 	Log.Infof("from %s to %s.\n", conn.RemoteAddr(), remote.RemoteAddr())
-	go transaction(conn, remote, complete, oneSwitch, otherSwitch, true)
+	
+	List :=  make(map[string]*IPStruct)
+	
+	go transaction(conn, remote, complete, oneSwitch, otherSwitch, true, List)
 	// 将远程服务返回的数据返回给客户端
-	go transaction(remote, conn, complete, otherSwitch, oneSwitch, false)
+	go transaction(remote, conn, complete, otherSwitch, oneSwitch, false, List)
 	<-complete
 	<-complete
 	
-	
-	delete(List,  fmt.Sprintf("%v:%v", conn.RemoteAddr(), remote.RemoteAddr()))
-	delete(List,  fmt.Sprintf("%v:%v", remote.RemoteAddr(), conn.RemoteAddr()))
+    TotalBytesLock.Lock()
+    delete(List,  fmt.Sprintf("%v:%v", conn.RemoteAddr(), remote.RemoteAddr()))
+    delete(List,  fmt.Sprintf("%v:%v", remote.RemoteAddr(), conn.RemoteAddr()))
+    TotalBytesLock.Unlock()
+    
 	remote.Close()
 }
 
 
 // 数据交换传输（从from读数据，再写入to）
-func transaction(from, to net.Conn, complete, oneSwitch, otherSwitch chan bool, out bool) {
+func transaction(from, to net.Conn, complete, oneSwitch, otherSwitch chan bool, out bool, List map[string]*IPStruct) {
 	var err error
 	var read int
 	buffer := make([]byte, Config.BulkSize)
@@ -145,18 +152,22 @@ func transaction(from, to net.Conn, complete, oneSwitch, otherSwitch chan bool, 
 			 //   fmt.Println(string(buffer))
 			    //记录时间
 			 //   if strings.TrimSpace(str) != "" {
+			 	TotalBytesLock.Lock()
+
 			        List[fmt.Sprintf("%v:%v", from.RemoteAddr(), to.RemoteAddr())] =  &IPStruct{Time:time.Now().UnixNano(), Title:str} 
 			 //   }
-			    
+                TotalBytesLock.Unlock()
 			}else{
 			    //计算时间
+			    TotalBytesLock.Lock()
 			    start, ok :=  List[ fmt.Sprintf("%v:%v", to.RemoteAddr(), from.RemoteAddr() ) ]
+			    TotalBytesLock.Unlock()
 			    if ok && strings.TrimSpace(start.Title) != "" {  
                     elapsed := float64( time.Now().UnixNano() - start.Time )/ float64(time.Millisecond)
                     
                     //记录耗时比较长的数据
                     if int(elapsed) > int(Config.SlowTime) {
-                            Log.Infof("%vTime cost: %.2f ms \n", start.Title, elapsed)
+                            Log.Infof("%v Time cost: %.2f ms ", start.Title, elapsed)
                     }
                     //格式化展示
                     if elapsed > 1000 {
