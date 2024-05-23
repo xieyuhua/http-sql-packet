@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sync"
 	"strings"
+    "github.com/sirupsen/logrus"
 )
 
 var Onlinenum int
@@ -167,7 +168,10 @@ func transaction(from, to net.Conn, complete, oneSwitch, otherSwitch chan bool, 
                     
                     //记录耗时比较长的数据
                     if int(elapsed) > int(Config.SlowTime) {
-                            Log.Infof("%v Time cost: %.2f ms ", start.Title, elapsed)
+                        
+                        Logs.WithFields(logrus.Fields{
+                            "cost": fmt.Sprintf("%.2f ms", elapsed),
+                        }).Info(start.Title)
                     }
                     //格式化展示
                     if elapsed > 1000 {
